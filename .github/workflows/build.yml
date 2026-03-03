@@ -1,0 +1,56 @@
+name: Rust Build
+
+on:
+  push:
+    branches: [main]
+    tags:
+      - "*"
+  pull_request:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - runner: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+          - runner: ubuntu-24.04-arm
+            target: aarch64-unknown-linux-gnu
+
+    runs-on: ${{ matrix.runner }}
+
+    steps:
+      # Checkout code
+      - uses: actions/checkout@v6
+
+      # Install Rust stable toolchain
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+          components: rustfmt, clippy
+
+      # Cache Cargo registry & git deps
+      - name: Cache Cargo registry
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: cargo-registry-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
+
+      # Cache target directory
+      - name: Cache Cargo target
+        uses: actions/cache@v5
+        with:
+          path: target
+          key: cargo-target-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            cargo-target-${{ matrix.target }}-
+
+      - name: Build
+        run: cargo build
+
+      - name: Test
+        run: cargo test

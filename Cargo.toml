@@ -1,0 +1,15 @@
+[package]
+name = "waveshare-st7789vm"
+version = "0.1.0"
+edition = "2024"
+
+[features]
+tracing = [ "dep:tracing" ]
+
+[dependencies]
+tracing = { version = "0.1", optional = true }
+rppal = { version = "0.22", features = ["hal"] }
+embedded-hal = "1"
+mipidsi = "0.10"
+embedded-hal-bus = "0.3"
+static_cell = "2"
